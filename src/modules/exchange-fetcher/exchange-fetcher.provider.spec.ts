@@ -16,17 +16,10 @@ describe('ExchangeFetcherProvider', () => {
 
   const mockRate: MonobankRate = {
     currencyCodeA: 840, // USD
-    currencyCodeB: 978, // EUR
+    currencyCodeB: 980, // UAH
     date: Date.now(),
-    rateBuy: 0.85,
-    rateSell: 0.86,
-  };
-
-  const mockCrossRate: MonobankRate = {
-    currencyCodeA: 978, // EUR
-    currencyCodeB: 826, // GBP
-    date: Date.now(),
-    rateCross: 0.88,
+    rateBuy: 41,
+    rateSell: 42,
   };
 
   const mockAxiosResponse: AxiosResponse = {
@@ -78,28 +71,19 @@ describe('ExchangeFetcherProvider', () => {
     it('should return rate from cache when using bulk strategy', async () => {
       cacheService.get.mockResolvedValueOnce([mockRate]);
 
-      const rate = await provider.fetchRate(840, 978);
+      const rate = await provider.fetchRate(840, 980);
 
-      expect(rate).toBe(0.855); // (0.85 + 0.86) / 2
+      expect(rate).toBe(41.5);
       expect(cacheService.get).toHaveBeenCalled();
     });
 
     it('should fetch rate from API when not in cache', async () => {
       httpService.get.mockReturnValueOnce(of(mockAxiosResponse));
 
-      const rate = await provider.fetchRate(840, 978);
+      const rate = await provider.fetchRate(840, 980);
 
-      expect(rate).toBe(0.855);
+      expect(rate).toBe(41.5);
       expect(httpService.get).toHaveBeenCalled();
-    });
-
-    it('should calculate cross rate correctly', async () => {
-      const crossRateResponse = { ...mockAxiosResponse, data: [mockCrossRate] };
-      httpService.get.mockReturnValueOnce(of(crossRateResponse));
-
-      const rate = await provider.fetchRate(978, 826);
-
-      expect(rate).toBe(0.88);
     });
   });
 
@@ -112,7 +96,7 @@ describe('ExchangeFetcherProvider', () => {
       expect(pairs).toEqual([
         {
           currencyCodeA: 840,
-          currencyCodeB: 978,
+          currencyCodeB: 980,
         },
       ]);
     });

@@ -21,7 +21,7 @@ The API documentation is available via Swagger. You can access it locally at:
 To run the application locally, follow these steps:
 
 1. Clone the repository:
-   git clone https://github.com/vladyslav-kravchuk/currency-converter-api.git
+   git clone git@github.com:LudmilaShilo/currency-convertor.git
 
 2. Install dependencies:
    npm install
