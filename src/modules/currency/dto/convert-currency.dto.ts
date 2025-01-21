@@ -6,31 +6,48 @@ import {
 } from '../enums/supported-currencies.enum';
 
 export class ConvertCurrencyDto {
-  @ApiProperty({ example: 'USD', description: 'Source currency' })
-  @IsNotEmpty()
-  @IsEnum(SupportedCurrencies, {
-    message: 'Source currency must be one of: USD, EUR, UAH',
+  @ApiProperty({
+    description: 'Source currency code',
+    example: 'USD',
+    enum: SupportedCurrencies,
   })
+  @IsNotEmpty()
+  @IsEnum(SupportedCurrencies)
   sourceCurrency: string;
 
-  @ApiProperty({ example: 'UAH', description: 'Target currency' })
-  @IsNotEmpty()
-  @IsEnum(TargetCurrency, {
-    message: 'Target currency must: UAH',
+  @ApiProperty({
+    description: 'Target currency code (only UAH supported)',
+    example: 'UAH',
+    enum: TargetCurrency,
   })
+  @IsNotEmpty()
+  @IsEnum(TargetCurrency)
   targetCurrency: string;
 
-  @ApiProperty({ example: 100, description: 'Amount to convert' })
+  @ApiProperty({
+    description: 'Amount to convert',
+    example: 100,
+    minimum: 0.01,
+  })
   @IsNumber()
   @IsNotEmpty()
-  @Min(0.01, { message: 'Amount must be a positive number greater than 0' })
+  @Min(0.01)
   amount: number;
 }
 
 export class ConversionResult {
+  @ApiProperty({ example: 'USD' })
   sourceCurrency: string;
+
+  @ApiProperty({ example: 'UAH' })
   targetCurrency: string;
+
+  @ApiProperty({ example: 100 })
   amount: number;
+
+  @ApiProperty({ example: 3650 })
   convertedAmount: number;
+
+  @ApiProperty({ example: 36.5 })
   rate: number;
 }
