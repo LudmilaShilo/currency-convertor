@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { Injectable, HttpException, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { catchError, retry, timeout } from 'rxjs/operators';
@@ -11,12 +11,17 @@ import {
   ExchangeRateProvider,
   CurrencyPair,
 } from './interfaces/exchange-rate.provider';
+import {
+  HttpStatus as CommonHttpStatus,
+  REDIS,
+  TIME,
+} from '../../common/constants';
 
 @Injectable()
 export class ExchangeFetcherProvider implements ExchangeRateProvider {
   private readonly logger = new Logger(ExchangeFetcherProvider.name);
   private readonly config = apiConfig;
-  private readonly CACHE_KEY = 'exchange_rates:all';
+  private readonly CACHE_KEY = REDIS.ALL_RATES_KEY;
 
   constructor(
     private readonly httpService: HttpService,
@@ -39,7 +44,7 @@ export class ExchangeFetcherProvider implements ExchangeRateProvider {
       if (!rate) {
         throw new HttpException(
           'Exchange rate not found',
-          HttpStatus.SERVICE_UNAVAILABLE,
+          CommonHttpStatus.SERVICE_UNAVAILABLE,
         );
       }
 
@@ -56,7 +61,7 @@ export class ExchangeFetcherProvider implements ExchangeRateProvider {
     if (!rate) {
       throw new HttpException(
         'Exchange rate not found',
-        HttpStatus.SERVICE_UNAVAILABLE,
+        CommonHttpStatus.SERVICE_UNAVAILABLE,
       );
     }
 
@@ -101,7 +106,7 @@ export class ExchangeFetcherProvider implements ExchangeRateProvider {
           retry({
             count: this.config.maxRetries,
             delay: (error, retryCount) => {
-              const delay = 1000 * (1 << retryCount);
+              const delay = TIME.ONE_SECOND_MS * (1 << retryCount);
               this.logger.warn(
                 `${context}: Retrying request (${retryCount}/${this.config.maxRetries}) after ${delay}ms`,
                 error.message,
@@ -114,7 +119,7 @@ export class ExchangeFetcherProvider implements ExchangeRateProvider {
             if (!isValidation) {
               throw new HttpException(
                 'Exchange rate service is temporarily unavailable',
-                HttpStatus.SERVICE_UNAVAILABLE,
+                CommonHttpStatus.SERVICE_UNAVAILABLE,
               );
             }
             return [];
@@ -128,7 +133,7 @@ export class ExchangeFetcherProvider implements ExchangeRateProvider {
       if (!isValidation) {
         throw new HttpException(
           'Exchange rate service is temporarily unavailable',
-          HttpStatus.SERVICE_UNAVAILABLE,
+          CommonHttpStatus.SERVICE_UNAVAILABLE,
         );
       }
       return [];

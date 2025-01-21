@@ -9,7 +9,7 @@ import {
 import { Redis } from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { rateLimitConfig } from '../../../config/rate-limit.config';
-import { ErrorMessages } from '../../../common/constants/error-messages';
+import { ErrorMessages } from '../../../common/constants';
 
 @Injectable()
 export class RateLimitGuard implements CanActivate {

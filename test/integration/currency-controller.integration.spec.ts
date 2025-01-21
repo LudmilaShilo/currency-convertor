@@ -3,6 +3,8 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { EXCHANGE_RATE_PROVIDER } from '../../src/modules/exchange-fetcher/constants/tokens';
+import { CacheModule } from '@nestjs/common';
+import { CacheService } from '../../src/modules/cache/cache.service';
 
 describe('CurrencyController (e2e)', () => {
   let app: INestApplication;
@@ -14,15 +16,29 @@ describe('CurrencyController (e2e)', () => {
     ]),
   };
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
+      .overrideModule(CacheModule)
+      .useModule({
+        module: class MockCacheModule {},
+        providers: [
+          {
+            provide: CacheService,
+            useValue: {
+              get: jest.fn().mockResolvedValue(null),
+              set: jest.fn(),
+            },
+          },
+        ],
+        exports: [CacheService],
+      })
       .overrideProvider(EXCHANGE_RATE_PROVIDER)
       .useValue(mockExchangeProvider)
       .compile();
 
-    app = moduleFixture.createNestApplication();
+    app = module.createNestApplication();
     app.setGlobalPrefix('api');
     app.useGlobalPipes(new ValidationPipe());
     await app.init();

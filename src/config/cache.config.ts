@@ -1,7 +1,8 @@
 import { CacheConfig } from './interfaces/cache-config.interface';
+import { REDIS, TIME } from '../common/constants';
 
 export const cacheConfig: CacheConfig = {
-  ttl: 3600, // 1 hour
-  host: 'localhost',
-  port: 6379,
+  ttl: TIME.ONE_HOUR_SEC,
+  host: REDIS.DEFAULT_HOST,
+  port: REDIS.DEFAULT_PORT,
 };
